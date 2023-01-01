@@ -70,11 +70,17 @@ for(tuple in merge_list) {
   salary_sum <- salary_sum + tuple[[1]]
   gasonile_sum <- gasonile_sum + tuple[[2]]
   if (count == 100) {
-    grouped_list[[length(grouped_list) + 1]] <- map2(salary_sum / 100, gasonile_sum / 100,  ~ c(.x, .y))
+    grouped_list[[length(grouped_list) + 1]] <- list(salary_sum / 100, gasonile_sum / 100)
     count <- 0
     salary_sum <- 0
     gasonile_sum <- 0
   }
 }
 grouped_list
+```
+
+```{r}
+x <- map_dbl(grouped_list, 1)
+y <- map_dbl(grouped_list, 2)
+plot(x, y, pch=16, col="blue")
 ```
