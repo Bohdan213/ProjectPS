@@ -1,0 +1,5 @@
+"0","x <- map_dbl(merge_list, 1)"
+"0","y <- map_dbl(merge_list, 2)"
+"0","sorted_x <- sort(x)"
+"0","sorted_y <- y[order(x)]"
+"0","merge_list <- map2(sorted_x, sorted_y, ~ c(.x, .y))"

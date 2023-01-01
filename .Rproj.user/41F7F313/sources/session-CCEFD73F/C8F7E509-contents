@@ -1,0 +1,80 @@
+### Install packages
+
+```{r}
+install.packages(c("stats", "tidyverse", "readr", "broom", "ggplot2", "lmtest"))
+```
+
+### Import libraries
+
+```{r}
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(broom)
+library(tidyverse)
+library(stats)
+```
+
+### Read the data
+
+```{r}
+data <- read_csv("cost-of-living.csv")
+data <- data[! is.na(data$x54) & ! is.na(data$x33), ]
+salary <- data$x54
+gasoline <- data$x33
+merge_list <- map2(data$x54, data$x33, ~ c(.x, .y))
+```
+
+### Structure of the data
+
+```{r}
+str(data)
+```
+
+### Plotting data
+
+```{r}
+hist(salary)
+hist(gasoline)
+x <- map_dbl(merge_list, 2)
+y <- map_dbl(merge_list, 1)
+plot(x, y, pch=16, col="blue")
+```
+
+### Mean values
+
+```{r}
+salary_mean <- mean(salary)
+gasoline_mean <- mean(gasoline)
+```
+
+### Data researching
+
+```{r}
+x <- map_dbl(merge_list, 1)
+y <- map_dbl(merge_list, 2)
+sorted_x <- sort(x)
+sorted_y <- y[order(x)]
+merge_list <- map2(sorted_x, sorted_y, ~ c(.x, .y))
+```
+
+### Grouping
+
+```{r}
+count <- 0
+grouped_list <- list()
+salary_sum <- 0
+gasonile_sum <- 0
+for(tuple in merge_list) {
+  count <- count + 1
+  salary_sum <- salary_sum + tuple[[1]]
+  gasonile_sum <- gasonile_sum + tuple[[2]]
+  if (count == 100) {
+    grouped_list[[length(grouped_list) + 1]] <- map2(salary_sum / 100, gasonile_sum / 100,  ~ c(.x, .y))
+    count <- 0
+    salary_sum <- 0
+    gasonile_sum <- 0
+  }
+}
+grouped_list
+```

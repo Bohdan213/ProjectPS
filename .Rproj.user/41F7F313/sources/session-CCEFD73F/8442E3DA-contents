@@ -1,0 +1,130 @@
+---
+title: 'Seminar 15: Linear regression'
+output:
+  html_document:
+    df_print: paged
+editor_options:
+  chunk_output_type: inline
+---
+
+**Problem 15**
+
+```{r}
+N <- 4
+set.seed(N)
+```
+
+### 1. Generate $20$ values $(x_k,y_k)$ as follows:
+
+-   $x_k$ uniformly distributed on $(-2,2)$\
+-   $y_k = \sin(x_k) + c*\sin(N*x_k)$, where $N$ is the id-number (no. on the list) and $c$ some parameter (see p.4)
+
+```{r}
+c = 0.5
+
+x <- runif(20, -2, 2)
+y <- sin(x) + c * sin(N * x)
+```
+
+2.  Draw the data and the regression line
+
+```{r}
+linear_model <- lm(y ~ x)
+plot(x, y, pch=1, xlim=c(-2,2), col = "blue")
+abline(linear_model, col = "purple")
+```
+
+3.  Print the summary of lm and discuss all the data obtained:
+
+-   distribution of the residuals\
+-   estimates for the intercept and the slope and their characteristics, $p$-values of the tests etc
+-   estimated standard error and its distribution
+-   determination coefficient
+
+```{r}
+summary(linear_model)
+```
+
+**Call**: This is an R feature that shows what function and parameters were used to create the model.
+
+**Residuals**: summarizes distribution of *residuals* $r_k:= y_k - \hat a - \hat b x_k$ (difference between what the model predicted and the actual value of y)
+
+**Coefficients**: These are the weights that minimize the sum of the square of the errors:\
+**Estimate** gives the estimate\
+**Std. Error** is Residual Standard Error divided by the square root of the sum of the square of that particular x variable.\
+**t value**: estimate divided by Std. Error\
+**Pr(\>\|t\|)**: returns the $p$-value for testing the hypothesis that the coefficient is zero
+
+**Residual standard error** is the estimate for the variance $\hat\sigma^2:= \hat R/(n-2)$; it has the $\chi^2_{n-2}$-distribution
+
+**Multiple R-squared** is the determination coefficient $r^2$
+
+**F-statistics** is the value of that statistics for testing $H_0$ that the *residual variance* is equal to the *regression variance* or is even bigger; under $H_0$ it has the Fischer distribution
+
+4.  Discuss how the model goodness-of-fit depends on the parameter $c$. Test $c=.5$; $1$; and $5$
+
+```{r}
+c_list = c(0.5, 1, 5)
+
+x <- runif(20, -2, 2)
+
+for (i in 1:3) {
+  coef = c_list[i]
+  y <- sin(x) + coef * sin(N * x)
+  
+  linear_model <- lm(y ~ x)
+  plot(x, y, pch=1, xlim=c(-2,2), col = "blue")
+  abline(linear_model, col = "purple")
+  
+  cat("Summary for c = ", coef, "\n")
+  #print(summary(linear_model))
+  
+  #Residual Standard error (Like Standard Deviation)
+  k = length(linear_model) - 1 #Subtract one to ignore intercept
+  SSE = sum(linear_model$residuals ** 2) # sum of squares for error
+  n = length(linear_model$residuals)
+  err = sqrt(SSE / (n - (1 + k))) #Residual Standard Error
+  
+  cat("err = ", err)
+  cat("\n\n")
+}
+```
+
+5.  Draw the confidence region for the mean values of $Y$
+
+```{r}
+c = 0.5
+
+x <- runif(20, -2, 2)
+y <- sin(x) + c * sin(N * x)
+linear_model <- lm(y ~ x)
+
+plot(x, y, xlim = c(-2,2), pch=1, col="blue")
+
+predicted.ci <- predict(linear_model, interval = "confidence")
+
+polygon(c(rev(x), x), c(rev(predicted.ci[ ,3]), predicted.ci[ ,2]), col = 'bisque', border = NA)
+
+lines(x, predicted.ci[ ,3], col = 'darksalmon')
+lines(x, predicted.ci[ ,2], col = 'darksalmon')
+
+abline(linear_model, col="purple")
+points(x, y, xlim = c(-2,2), pch=1, col="blue")
+```
+
+6.  Draw the predicted region for the values of $Y$
+
+```{r}
+predicted.val <- predict(linear_model, interval = "prediction") 
+plot(x, y, xlim = c(-2,2), pch=1, col="blue")
+
+polygon(c(rev(x), x), c(rev(predicted.val[ ,3]), predicted.val[ ,2]), col = 'lightblue', border = NA)
+
+lines(x, predicted.val[ ,3],  col = 'darkblue')
+lines(x, predicted.val[ ,2],  col = 'darkblue')
+
+abline(linear_model, col="purple")
+points(x, y, xlim = c(-2,2), pch=1, col="blue")
+```
+
+7.  Submit all the results/comments/explanations as an `R Notebook`

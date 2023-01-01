@@ -1,0 +1,14 @@
+"0","data <- read_csv(""cost-of-living.csv"")"
+"2","New names:"
+"2","[1mRows: [22m[34m4874[39m [1mColumns: [22m[34m59[39m"
+"2","[36m──[39m [1mColumn specification[22m [36m────────────────────────────────────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m  (2): city, country
+[32mdbl[39m (57): ...1, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21, x22, x23..."
+"2","
+[36mℹ[39m Use `spec()` to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0","data <- data[! is.na(data$x54) & ! is.na(data$x33), ]"
+"0","salary <- data$x54"
+"0","gasoline <- data$x33"
+"0","merge_list <- map2(data$x54, data$x33, ~ c(.x, .y))"

@@ -1,0 +1,4 @@
+"0",""
+"0","h_y <- hist(y, breaks = 150, plot = FALSE)"
+"0","cuts <- cut(h_y$breaks, c(-Inf, -.005, Inf))"
+"0","plot(h_y)"

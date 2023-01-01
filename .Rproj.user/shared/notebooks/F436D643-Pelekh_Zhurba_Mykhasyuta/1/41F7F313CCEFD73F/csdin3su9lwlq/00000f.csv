@@ -1,0 +1,35 @@
+"0","require(BSDA)"
+"2","Loading required package: BSDA
+"
+"2","Warning: package ‘BSDA’ was built under R version 4.2.2"
+"2","Loading required package: lattice
+"
+"2","
+Attaching package: ‘BSDA’
+
+"
+"2","The following object is masked from ‘package:datasets’:
+
+    Orange
+
+"
+"0","library(BSDA)"
+"0","require(EnvStats)   "
+"2","Loading required package: EnvStats
+"
+"2","Warning: package ‘EnvStats’ was built under R version 4.2.2"
+"2","
+Attaching package: ‘EnvStats’
+
+"
+"2","The following objects are masked from ‘package:stats’:
+
+    predict, predict.lm
+
+"
+"2","The following object is masked from ‘package:base’:
+
+    print.default
+
+"
+"0","library(EnvStats)"

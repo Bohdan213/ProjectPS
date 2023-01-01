@@ -1,0 +1,187 @@
+---
+title: "Seminar 15: Linear regression"
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+**Problem 15**
+
+1.  Generate $20$ values $(x_k,y_k)$ as follows:
+
+-   $x_k$ uniformly distributed on $(-2,2)$\
+
+-   $y_k = \sin(x_k) + c*\sin(N*x_k)$, where $N$ is the id-number (no. on the list) and $c$ some parameter (see p.4)
+
+    ```{r}
+    func <- function(k, c) {
+      return (sin(k) + c * sin(4 * k))
+    }
+    X <- runif(20, min = -2, max = 2)
+    Y1 <- seq(1, 20)
+    Y2 <- seq(1, 20)
+    Y3 <- seq(1, 20)
+    for (idx in 1:20) {
+      Y1[idx] = func(X[idx], 0.5)
+      Y2[idx] = func(X[idx], 1)
+      Y3[idx] = func(X[idx], 5)
+    }
+    X <- sort(X, decreasing = FALSE)
+    X
+    Y1
+    Y2
+    Y3
+    ```
+
+2.  Draw the data and the regression line
+
+    ### Plot for Y1
+
+    ```{r}
+    lm1 <- lm(Y1~X)
+    plot(X,Y1, xlim=c(-5,5), col = "blue")
+    abline(lm1, col = "red")
+    ```
+
+    ### Plot for Y2
+
+    ```{r}
+    lm2 <- lm(Y2~X)
+    plot(X, Y2, xlim=c(-5,5), col = "blue")
+    abline(lm2, col = "red")
+    ```
+
+    ### Plot for Y3
+
+    ```{r}
+    lm3 <- lm(Y3~X)
+    plot(X, Y3, xlim=c(-5,5), col = "blue")
+    abline(lm3, col = "red")
+    ```
+
+3.  Print the summary of lm and discuss all the data obtained:
+
+-   distribution of the residuals
+
+-   estimates for the intercept and the slope and their characteristics, $p$-values of the tests etc
+
+-   estimated standard error and its distribution
+
+-   determination coefficient
+
+    ```{r}
+    summary(lm1)
+    summary(lm2)
+    summary(lm3)
+    ```
+
+    "Summary" function explanation
+
+*"Call"* shows what parameters and function were used at model.
+
+*"Residuals"* summarizes the distribution of residuals $r_k:= y_k - \hat a - \hat b x_k$
+
+*"Coefficients"* weights that minimize the sum of the square of the errors:\
+- "Estimate" - estimate
+
+-   "Std. Error" - Residual Standard Error divided by the square root of the sum of the that particular x variable squared
+
+-   "t value" - estimate divided by Std. Error
+
+-   "Pr(\>\|t\|)" - p-value (hypothesis that coefficient is zero)
+
+*"Residual standard error"* - estimate for variance $\hat\sigma^2:= \hat R/(n-2)$ (its distribution is $\chi^2_{n-2}$)
+
+*"Multiple R-squared"* - determination coefficient $r^2$
+
+*"F-statistics"* - value of statistics for testing $H_0$ that the [residual variance]{.underline} is equal to the [regression variance]{.underline} or is even bigger. Under $H_0$ it has the Fischer distribution
+
+4.  Discuss how the model goodness-of-fit depends on the parameter $c$. Test $c=.5$; $1$; and $5$
+
+```{r}
+
+c_vect = c(0.5, 1, 5)
+
+x <- runif(20, -2, 2)
+
+for (i in 1:3) {
+  coef = c_vect[i]
+  y <- func(x, coef)
+  linear_model <- lm(y ~ x)
+  plot(x, y, pch=1, xlim=c(-2,2), ylim=c(-6,6), col = "blue")
+  abline(linear_model, col = "red")
+  cat("Summary for c = ", coef, "\n")
+
+  #Residual Standard error (Like Standard Deviation)
+  k = length(linear_model$coefficients) - linear_model$coefficients[1] #Subtract one to ignore intercept
+  SSE = sum(linear_model$residuals ** 2) # sum of squares for error
+  n = length(linear_model$residuals)
+  err = sqrt(SSE / (n - (1 + k))) #Residual Standard Error
+  
+  cat("err = ", err, summary(linear_model)$r.squared)
+  # cat("\n\n")
+  
+}
+```
+
+5.  Draw the confidence region for the mean values of $Y$
+
+```{r}
+c = 0.5
+
+x <- sort(runif(20, -2, 2))
+y <- func(X,c)
+linear_model <- lm(y ~ x)
+plot(x, y, xlim = c(-2,2), pch=1, col="blue")
+
+predicted.ci <- predict(linear_model, interval = "confidence")
+# ---
+polygon(c(rev(x), x), c(rev(predicted.ci[ ,3]), predicted.ci[ ,2]), col = 'bisque', border = NA)
+# ---
+lines(x, predicted.ci[ ,3], col = 'darksalmon')
+lines(x, predicted.ci[ ,2], col = 'darksalmon')
+
+abline(linear_model, col="purple")
+points(x, y, xlim = c(-2,2), pch=1, col="blue")
+```
+
+6.  Draw the prediceted region for the values of $Y$
+
+    ```{r}
+    func <- function(X, Y, lm) {
+      # confidence/prediction intervals
+      predicted.ci <- predict(lm, interval = "confidence")
+      predicted.val <- predict(lm, interval = "prediction") 
+      # plot the points
+      plot(X, Y, xlim = c(-3,3),ylim=c(-3,3)) #,pch=16,col="blue")
+      
+      # add filled prediction region
+      polygon(c(rev(X), X), c(rev(predicted.val[ ,3]), predicted.val[ ,2]), col = 'lightblue', border = NA)
+      # draw the border lines
+      lines(X, predicted.val[ ,3],  col = 'darkblue')
+      lines(X, predicted.val[ ,2],  col = 'darkblue')
+      
+      # add filled confidence region
+      polygon(c(rev(X), X), c(rev(predicted.ci[ ,3]), predicted.ci[ ,2]), col = 'grey90', border = NA)
+      # draw the border lines
+      lines(X, predicted.ci[ ,3],  col = 'grey50')
+      lines(X, predicted.ci[ ,2],  col = 'grey50')
+      
+      # add regression line atop
+      abline(lm, col="red")
+      #draw the points atop the region
+      points(X, Y, pch=16, col="blue")
+    }
+
+    func(X, Y2, lm2)
+    ```
+
+7.  Submit all the results/comments/explanations as an `R Notebook`
+
+```{r}
+N <- 4 # change 50 to the id = no. on the list
+set.seed(N)  
+
+## Your code and explanations here
+
+```
