@@ -126,8 +126,10 @@ lm_plotting(linear_model2)
 let's compare their slopes param.
 
 ```{r}
-slope1 <- coef(linear_model1)[2]
-slope2 <- coef(linear_model2)[2]
+new_data <- data[! is.na(data$x54) & ! is.na(data$x50), ]
+slope1 <- round(means(new_data$x54) / means(new_data$x50) * coef(linear_model1)[2], 2)
+new_data <- data[! is.na(data$x54) & ! is.na(data$x43), ]
+slope2 <- round(means(new_data$x54) / means(new_data$x43) * coef(linear_model2)[2], 2)
 print(slope1)
 print(slope2)
 ```
