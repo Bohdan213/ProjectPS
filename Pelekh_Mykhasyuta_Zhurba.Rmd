@@ -9,7 +9,6 @@ library(readr)
 library(tidyverse)
 library(ggplot2)
 library(broom)
-library(tidyverse)
 library(stats)
 ```
 
@@ -89,6 +88,7 @@ grouped_list <- group_by(merge_list, 100)
 
 x <- map_dbl(grouped_list, 1)
 y <- map_dbl(grouped_list, 2)
+plotting(x, y)
 linear_model <- lm(y ~ x)
 lm_plotting(linear_model)
 ```
@@ -104,6 +104,7 @@ grouped_list <- group_by(merge_list, 100)
 
 x <- map_dbl(grouped_list, 1)
 y <- map_dbl(grouped_list, 2)
+plotting(x, y)
 linear_model1 <- lm(y ~ x)
 lm_plotting(linear_model1)
 ```
@@ -115,6 +116,7 @@ grouped_list <- group_by(merge_list, 100)
 
 x <- map_dbl(grouped_list, 1)
 y <- map_dbl(grouped_list, 2)
+plotting(x, y)
 linear_model2 <- lm(y ~ x)
 lm_plotting(linear_model2)
 ```
@@ -135,10 +137,12 @@ print(slope2)
 ### Table
 
 ```{r}
-result <- list()
+mtr <- matrix(0, nrow = 53, ncol = 2)
+count <- 1
 data <- data[! is.na(data$x54), ]
 for(col in colnames(data)) {
-  if (col != "x54" & col != "data_quality" & col != "city" & col != "country" & col != "...1") {
+  if (col != "x54" & col != "data_quality" & col != "city" & col != "country" & col != "...1" & col != "x42") {
+    mtr[count, 1] <- col
     new_data <- data[ ! is.na(data[[col]]), ]
     merge_list <- map2(new_data$x54, new_data[[col]], ~ c(.x, .y))
     grouped_list <- group_by(merge_list, 100)
@@ -147,8 +151,16 @@ for(col in colnames(data)) {
     linear_model <- lm(y ~ x)
     model_summary <- summary(linear_model)
     r_squared <- model_summary$r.squared
-    result <- append(result, r_squared)
+    if (r_squared > .75) {
+      mtr[count, 2] <- round(means(x) / means(y) * coef(linear_model)[2], 2)
+    }
+    count <- count + 1
   }
 }
-result
+for (i in 1:dim(mtr)[1]) {
+    for (j in 1:dim(mtr)[2]) {
+        cat(mtr[i, j], " ")
+    }
+    cat("\n")
+}
 ```
