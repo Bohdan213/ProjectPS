@@ -17,9 +17,6 @@ library(stats)
 
 ```{r}
 data <- read_csv("cost-of-living.csv")
-data <- data[! is.na(data$x54) & ! is.na(data$x43), ]
-head(data)
-
 ```
 
 ### Structure of the data
@@ -28,32 +25,24 @@ head(data)
 head(data)
 ```
 
-### Needed data
-
-```{r}
-salary <- data$x54
-gasoline <- data$x43
-merge_list <- map2(data$x54, data$x43, ~ c(.x, .y))
-```
-
 ### Plotting data
 
 ```{r}
-hist(salary, col="darkred", ,border="white")
-hist(gasoline, col="darkred", ,border="white")
-x <- map_dbl(merge_list, 2)
-y <- map_dbl(merge_list, 1)
+plotting <- function(salary, param) {
+  hist(salary, col="darkred", border="white")
+  hist(param, col="darkred", border="white")
+}
 ```
 
-### Mean values
+### Mean value
 
 ```{r}
-salary_mean <- mean(salary)
-gasoline_mean <- mean(gasoline)
+means <- function(param) {
+  return(mean(param))
+}
 ```
 
-
-### Data researching & Grouping
+### Data Grouping
 
 ```{r}
 group_by <- function(data, n) {
@@ -82,23 +71,84 @@ group_by <- function(data, n) {
 }
 ```
 
-```{r}
-grouped_list <- group_by(merge_list, 100)
-```
+### Plotting linear model
 
 ```{r}
+lm_plotting <- function(lm) {
+  plot(x, y, pch=16, col="blue")
+  abline(lm, col = "red")
+}
+```
+
+#### Firstly we want to check how gasoline price depends on salary
+
+```{r}
+new_data <- data[! is.na(data$x54) & ! is.na(data$x33), ]
+merge_list <- map2(new_data$x54, new_data$x33, ~ c(.x, .y))
+grouped_list <- group_by(merge_list, 100)
+
 x <- map_dbl(grouped_list, 1)
 y <- map_dbl(grouped_list, 2)
 linear_model <- lm(y ~ x)
-summary(linear_model)
-slope <- coef(linear_model)[2]
-print(slope)
+lm_plotting(linear_model)
 ```
-### Plotting linear regression
+
+#### We can see that we have some nezrozumile sho, Fedya opishi
+
+#### Let's try to check other dependencies(salary \~ Apartment in City centre and salary \~ primary school)
 
 ```{r}
-plot(x, y, pch=16, col="blue")
-abline(linear_model, col = "red")
-plot(x, y, type="l", col="blue", lwd=2)
-abline(linear_model, col="darkred", lwd=2)
-``` 
+new_data <- data[! is.na(data$x54) & ! is.na(data$x50), ]
+merge_list <- map2(new_data$x54, new_data$x50, ~ c(.x, .y))
+grouped_list <- group_by(merge_list, 100)
+
+x <- map_dbl(grouped_list, 1)
+y <- map_dbl(grouped_list, 2)
+linear_model1 <- lm(y ~ x)
+lm_plotting(linear_model1)
+```
+
+```{r}
+new_data <- data[! is.na(data$x54) & ! is.na(data$x43), ]
+merge_list <- map2(new_data$x54, new_data$x43, ~ c(.x, .y))
+grouped_list <- group_by(merge_list, 100)
+
+x <- map_dbl(grouped_list, 1)
+y <- map_dbl(grouped_list, 2)
+linear_model2 <- lm(y ~ x)
+lm_plotting(linear_model2)
+```
+
+### We see two linear models with high goodness-of-fit
+
+let's compare their slopes param.
+
+```{r}
+slope1 <- coef(linear_model1)[2]
+slope2 <- coef(linear_model2)[2]
+print(slope1)
+print(slope2)
+```
+
+#### What we see
+
+### Table
+
+```{r}
+result <- list()
+data <- data[! is.na(data$x54), ]
+for(col in colnames(data)) {
+  if (col != "x54" & col != "data_quality" & col != "city" & col != "country" & col != "...1") {
+    new_data <- data[ ! is.na(data[[col]]), ]
+    merge_list <- map2(new_data$x54, new_data[[col]], ~ c(.x, .y))
+    grouped_list <- group_by(merge_list, 100)
+    x <- map_dbl(grouped_list, 1)
+    y <- map_dbl(grouped_list, 2)
+    linear_model <- lm(y ~ x)
+    model_summary <- summary(linear_model)
+    r_squared <- model_summary$r.squared
+    result <- append(result, r_squared)
+  }
+}
+result
+```
