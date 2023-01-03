@@ -19,26 +19,32 @@ library(stats)
 
 ```{r}
 data <- read_csv("cost-of-living.csv")
-data <- data[! is.na(data$x54) & ! is.na(data$x33), ]
-salary <- data$x54
-gasoline <- data$x33
-merge_list <- map2(data$x54, data$x33, ~ c(.x, .y))
+data <- data[! is.na(data$x54) & ! is.na(data$x43), ]
+head(data)
+
 ```
 
 ### Structure of the data
 
 ```{r}
-str(data)
+head(data)
+```
+
+### Needed data
+
+```{r}
+salary <- data$x54
+gasoline <- data$x43
+merge_list <- map2(data$x54, data$x43, ~ c(.x, .y))
 ```
 
 ### Plotting data
 
 ```{r}
-hist(salary)
-hist(gasoline)
+hist(salary, col="darkred", ,border="white")
+hist(gasoline, col="darkred", ,border="white")
 x <- map_dbl(merge_list, 2)
 y <- map_dbl(merge_list, 1)
-plot(x, y, pch=16, col="blue")
 ```
 
 ### Mean values
@@ -76,11 +82,20 @@ for(tuple in merge_list) {
     gasonile_sum <- 0
   }
 }
+grouped_list[[length(grouped_list) + 1]] <- list(salary_sum / count, gasonile_sum / count)
 grouped_list
 ```
 
 ```{r}
 x <- map_dbl(grouped_list, 1)
 y <- map_dbl(grouped_list, 2)
+linear_model <- lm(y ~ x)
 plot(x, y, pch=16, col="blue")
+abline(linear_model, col = "red")
+```
+
+```{r}
+summary(linear_model)
+slope <- coef(linear_model)[2]
+print(slope)
 ```
