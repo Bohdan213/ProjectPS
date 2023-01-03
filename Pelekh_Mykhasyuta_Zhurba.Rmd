@@ -14,11 +14,23 @@ library(stats)
 
 ### Read the data
 
+Reading csv with data about cost of living.
+
+More detailed information about dataset: https://www.kaggle.com/datasets/mvieira101/global-cost-of-living
 ```{r}
 data <- read_csv("cost-of-living.csv")
 ```
 
 ### Structure of the data
+x1 - x55 are observed values for some city.
+
+You can check what particular number means on provided link.
+
+The most important parameter for our research is x54 (average monthly salary)
+
+We want to check whether dependency between salary and some prices is linear.
+
+Also we want to compare how fast some parameters grow comparing to salary growth.
 
 ```{r}
 head(data)
@@ -42,6 +54,12 @@ means <- function(param) {
 ```
 
 ### Data Grouping
+
+For our research we group our data the following way:
+
+Sort the data by average salary, and then divide them by groups.
+
+We use this approach mainly to avoid outliers and make the data more generalized.
 
 ```{r}
 group_by <- function(data, n) {
@@ -93,7 +111,19 @@ linear_model <- lm(y ~ x)
 lm_plotting(linear_model)
 ```
 
-#### We can see that we have some nezrozumile sho, Fedya opishi
+#### We can see that dependency is not linear
+
+If we look at our data plot, we can see, that after some point, greater salary leads to even lower gasoline price.
+
+So, the dependency between salary and gasoline price is not linear.
+
+It can be explained by the fact, that countries, who have own oil and gasoline are usually rich.
+
+So, salary is getting higher, while gasoline price stays the same, or even lower.
+
+In our research we are interested only in linear dependencies.
+
+So, we will ignore parameters, which are do not fit well to linear model.
 
 #### Let's try to check other dependencies(salary \~ Apartment in City centre and salary \~ primary school)
 
@@ -123,7 +153,11 @@ lm_plotting(linear_model2)
 
 ### We see two linear models with high goodness-of-fit
 
+Their deterministic coefficient is high, so the distribution is linear.
+
 let's compare their slopes param.
+
+This way we can check how fast some parameter grows according to salary growth.
 
 ```{r}
 new_data <- data[! is.na(data$x54) & ! is.na(data$x50), ]
@@ -134,9 +168,17 @@ print(slope1)
 print(slope2)
 ```
 
-#### What we see
+We see that price of apartments grows faster that price for primary school.
+
+It means that in rich countries apartments are also much-more expensive, while growth in school price is not so significant.
 
 ### Table
+
+In this section we build a table, which shows speed of growth of some parameter comparing to salary growth.
+
+This coefficient is obtained from slope coefficient of regression model.
+
+If our model fits bad in linear regression (has low r^2 deterministic coefficient), we print 0.
 
 ```{r}
 mtr <- matrix(0, nrow = 53, ncol = 2)
@@ -166,3 +208,19 @@ for (i in 1:dim(mtr)[1]) {
     cat("\n")
 }
 ```
+
+### Result of research
+
+From this table we can see, that a lot of parameters grow not linear.
+
+It shows that simple linear regression is not the best tool to make some researches,
+
+because real-world data usually depends on a lot of parameters and this dependency is non-linear.
+
+However, we can say that apartment price grows the fastest, so people in rich cities have approximately the same possibility to buy them, as people in poor cities.
+
+The slowest grows we get is a price on import beer, which means that beer price almost do not depend on salary level and is quite close in all categories.
+
+What is more, we do not have any parameter which is higher than 1.
+
+It means that prices to all parameters grow slower than salary, so people in rich cities can afford more, because growth in salary is higher than growth in other parameters.
