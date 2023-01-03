@@ -1,7 +1,5 @@
-### Install packages
-
-```{r}
-install.packages(c("stats", "tidyverse", "readr", "broom", "ggplot2", "lmtest"))
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ### Import libraries
@@ -54,48 +52,53 @@ salary_mean <- mean(salary)
 gasoline_mean <- mean(gasoline)
 ```
 
-### Data researching
+
+### Data researching & Grouping
 
 ```{r}
-x <- map_dbl(merge_list, 1)
-y <- map_dbl(merge_list, 2)
-sorted_x <- sort(x)
-sorted_y <- y[order(x)]
-merge_list <- map2(sorted_x, sorted_y, ~ c(.x, .y))
+group_by <- function(data, n) {
+  x <- map_dbl(data, 1)
+  y <- map_dbl(data, 2)
+  sorted_x <- sort(x)
+  sorted_y <- y[order(x)]
+  data <- map2(sorted_x, sorted_y, ~ c(.x, .y))
+  count <- 0
+  grouped_list <- list()
+  salary_sum <- 0
+  gasonile_sum <- 0
+  for(tuple in data) {
+    count <- count + 1
+    salary_sum <- salary_sum + tuple[[1]]
+    gasonile_sum <- gasonile_sum + tuple[[2]]
+    if (count == n) {
+      grouped_list[[length(grouped_list) + 1]] <- list(salary_sum / n, gasonile_sum / n)
+      count <- 0
+      salary_sum <- 0
+      gasonile_sum <- 0
+    }
+  }
+  grouped_list[[length(grouped_list) + 1]] <- list(salary_sum / count, gasonile_sum / count)
+  return(grouped_list)
+}
 ```
 
-### Grouping
-
 ```{r}
-count <- 0
-grouped_list <- list()
-salary_sum <- 0
-gasonile_sum <- 0
-for(tuple in merge_list) {
-  count <- count + 1
-  salary_sum <- salary_sum + tuple[[1]]
-  gasonile_sum <- gasonile_sum + tuple[[2]]
-  if (count == 100) {
-    grouped_list[[length(grouped_list) + 1]] <- list(salary_sum / 100, gasonile_sum / 100)
-    count <- 0
-    salary_sum <- 0
-    gasonile_sum <- 0
-  }
-}
-grouped_list[[length(grouped_list) + 1]] <- list(salary_sum / count, gasonile_sum / count)
-grouped_list
+grouped_list <- group_by(merge_list, 100)
 ```
 
 ```{r}
 x <- map_dbl(grouped_list, 1)
 y <- map_dbl(grouped_list, 2)
 linear_model <- lm(y ~ x)
-plot(x, y, pch=16, col="blue")
-abline(linear_model, col = "red")
-```
-
-```{r}
 summary(linear_model)
 slope <- coef(linear_model)[2]
 print(slope)
 ```
+### Plotting linear regression
+
+```{r}
+plot(x, y, pch=16, col="blue")
+abline(linear_model, col = "red")
+plot(x, y, type="l", col="blue", lwd=2)
+abline(linear_model, col="darkred", lwd=2)
+``` 
